@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package drawing;
 
 import java.awt.BasicStroke;
@@ -16,7 +12,7 @@ import javax.swing.ImageIcon;
 
 /**
  *
- * @author dmt5235
+ * @author Dylan Taylor
  */
 public abstract class Shape implements Serializable {
     //The following line is currently used only for switching current drawing mode.

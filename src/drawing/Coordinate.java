@@ -1,15 +1,10 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package drawing;
 
 import java.io.Serializable;
 
 /**
  *
- * @author dmt5235
+ * @author Dylan Taylor
  */
 public class Coordinate implements Serializable {
     public int x;

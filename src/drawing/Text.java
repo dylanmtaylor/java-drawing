@@ -1,8 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package drawing;
 
 import java.awt.Color;
@@ -11,7 +6,7 @@ import java.awt.Graphics2D;
 
 /**
  *
- * @author dmt5235
+ * @author Dylan Taylor
  */
 public class Text extends Shape {
     private String t;

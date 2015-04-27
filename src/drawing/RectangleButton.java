@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package drawing;
 
 import java.awt.Color;
@@ -10,7 +6,7 @@ import javax.swing.JButton;
 
 /**
  *
- * @author dmt5235
+ * @author Dylan Taylor
  */
 public class RectangleButton extends JButton {
 

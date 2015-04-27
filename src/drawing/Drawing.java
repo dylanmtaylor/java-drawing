@@ -1,9 +1,4 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/*
  * Drawing.java
  *
  * Created on Oct 4, 2012, 1:12:29 PM
@@ -44,7 +39,7 @@ import javax.swing.UnsupportedLookAndFeelException;
 
 /**
  *
- * @author dmt5235
+ * @author Dylan Taylor
  */
 public class Drawing extends javax.swing.JFrame {
 

@@ -11,7 +11,7 @@ import javax.swing.JButton;
 
 /**
  *
- * @author dmt5235
+ * @author Dylan Taylor
  */
 public class TextButton extends JButton {
     @Override
