@@ -1,0 +1,1030 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+/*
+ * Drawing.java
+ *
+ * Created on Oct 4, 2012, 1:12:29 PM
+ */
+package drawing;
+
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.GradientPaint;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.TexturePaint;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
+import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
+import java.awt.print.Book;
+import java.awt.print.PageFormat;
+import java.awt.print.PrinterException;
+import java.awt.print.PrinterJob;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
+import javax.swing.JColorChooser;
+import javax.swing.JFileChooser;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
+
+/**
+ *
+ * @author dmt5235
+ */
+public class Drawing extends javax.swing.JFrame {
+
+    boolean drawing = false; //whether or not we are currently drawing a shape
+    int drawMode = Shape.LINE; //used for setting the current drawing mode
+    ArrayList<Shape> shapes = new ArrayList<Shape>(); //stores all of the previously drawn shapes
+    Coordinate start; //starting coordinate of the shape currently being drawn
+    Image fg, bg; //foreground and background images for double buffering
+    ArrayList<Line> freeHandVector = new ArrayList<Line>();
+    GradientPaint gp;
+    TexturePaint tp;
+
+    /**
+     * Creates new form Drawing
+     */
+    public Drawing() {
+        initComponents();
+        //The following block of code fixes sooo many bugs including resizing, minimizing,  
+        //restoring, and moving the window, which cause the drawing to not draw properly. 
+        //This is absolutely necessary, and it makes the user experience much better.
+        this.addComponentListener(new ComponentListener() {
+            @Override
+            public void componentResized(ComponentEvent ce) {
+                clearDrawing();
+                repaintShapes(true);
+            }
+
+            @Override
+            public void componentMoved(ComponentEvent ce) {
+                clearDrawing();
+                repaintShapes(true);
+            }
+
+            @Override
+            public void componentShown(ComponentEvent ce) {
+                clearDrawing();
+                repaintShapes(true);
+            }
+
+            @Override
+            public void componentHidden(ComponentEvent ce) {
+                // do nothing, not neccesary.
+            }
+        });
+    }
+
+    void clearDrawing() {
+        bg = this.createImage(this.getWidth(), this.getHeight());
+        fg = this.createImage(this.getWidth(), this.getHeight());
+        Graphics bgg = bg.getGraphics();
+        bgg.setColor(new Color(255, 255, 240));
+        bgg.fillRect(0, 0, drawPanel.getWidth(), drawPanel.getHeight()); //clear the panel
+        bgg.setColor(Color.black);
+        for (int r = 0; r < 5; r++) {
+            bgg.drawRect(2 + (2 * r), 2 + (2 * r), drawPanel.getWidth() - (4 + (4 * r)), drawPanel.getHeight() - (4 + (4 * r)));
+        }
+        drawPanel.getGraphics().drawImage(bg, 0, 0, null);
+    }
+
+    @Override
+    public void paint(Graphics g) {
+        super.paint(g);
+    }
+
+    public void repaintShapes(boolean redrawAll) {
+        if (redrawAll) {
+            Graphics2D fgg = (Graphics2D) fg.getGraphics();
+            fgg.drawImage(bg, 0, 0, null);
+            for (int i = 0; i < shapes.size(); i++) {
+                fgg.setColor(shapes.get(i).c);
+                shapes.get(i).draw(fgg);
+            }
+            drawPanel.getGraphics().drawImage(fg, 0, 0, null);
+            bg.getGraphics().drawImage(fg, 0, 0, null);
+        }
+        Graphics g = drawPanel.getGraphics();
+        g.drawImage(bg, 0, 0, null);
+        updateColorPanel();
+    }
+
+    private int getThickness() {
+        try {
+            return Math.abs(thicknessSlider.getValue());
+        } catch (Exception e) {
+            return 1;
+        }
+    }
+
+    private int getAlpha() {
+        try {
+            return (int) (((float) alphaSlider.getValue() / 100.0) * 255.0);
+        } catch (Exception e) {
+            return 1;
+        }
+    }
+
+    private float getAlphaFloat() {
+        try {
+            return (float) (alphaSlider.getValue() / 100.0);
+        } catch (Exception e) {
+            return 1;
+        }
+    }
+
+    /**
+     * This method is called from within the constructor to initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is always
+     * regenerated by the Form Editor.
+     */
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+
+        buttonPanel = new javax.swing.JToolBar();
+        ovalButton = new drawing.OvalButton();
+        rectangleButton = new drawing.RectangleButton();
+        roundedRectangleButton1 = new drawing.RoundedRectangleButton();
+        lineButton = new drawing.LineButton();
+        freehandButton = new drawing.FreehandButton();
+        textButton = new drawing.TextButton();
+        clearButton = new javax.swing.JButton();
+        jSeparator1 = new javax.swing.JToolBar.Separator();
+        dashedBar = new javax.swing.JCheckBox();
+        filledBar = new javax.swing.JCheckBox();
+        transparencyPanel = new javax.swing.JPanel();
+        transparencyLabel = new javax.swing.JLabel();
+        alphaSlider = new javax.swing.JSlider();
+        setGradientToggle = new javax.swing.JToggleButton();
+        setTextureToggle = new javax.swing.JToggleButton();
+        jPanel1 = new javax.swing.JPanel();
+        textLabel = new javax.swing.JLabel();
+        placeTextField = new javax.swing.JTextField();
+        drawPanel = new javax.swing.JPanel();
+        sliderPanel = new javax.swing.JPanel();
+        colorPanel = new javax.swing.JPanel();
+        redPanel = new javax.swing.JPanel();
+        redSlider = new javax.swing.JSlider();
+        redLabel = new javax.swing.JLabel();
+        greenPanel = new javax.swing.JPanel();
+        greenSlider = new javax.swing.JSlider();
+        greenLabel = new javax.swing.JLabel();
+        bluePanel = new javax.swing.JPanel();
+        blueSlider = new javax.swing.JSlider();
+        blueLabel = new javax.swing.JLabel();
+        thicknessPanel = new javax.swing.JPanel();
+        thicknessSlider = new javax.swing.JSlider();
+        thicknessLabel = new javax.swing.JLabel();
+        menuBar = new javax.swing.JMenuBar();
+        jMenu1 = new javax.swing.JMenu();
+        open = new javax.swing.JMenuItem();
+        imageExportMenuItem = new javax.swing.JMenuItem();
+        save = new javax.swing.JMenuItem();
+        print = new javax.swing.JMenuItem();
+        dashed = new javax.swing.JMenu();
+        dashedMenuItem = new javax.swing.JCheckBoxMenuItem();
+        filledMenuItem = new javax.swing.JCheckBoxMenuItem();
+
+        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setMinimumSize(new java.awt.Dimension(900, 200));
+        setPreferredSize(new java.awt.Dimension(1100, 600));
+        addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
+            public void mouseMoved(java.awt.event.MouseEvent evt) {
+                formMouseMoved(evt);
+            }
+        });
+        addWindowStateListener(new java.awt.event.WindowStateListener() {
+            public void windowStateChanged(java.awt.event.WindowEvent evt) {
+                formWindowStateChanged(evt);
+            }
+        });
+
+        buttonPanel.setRollover(true);
+        buttonPanel.setToolTipText("Tools");
+
+        ovalButton.setText("        ");
+        ovalButton.setFocusable(false);
+        ovalButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        ovalButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        ovalButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                ovalButtonActionPerformed(evt);
+            }
+        });
+        buttonPanel.add(ovalButton);
+
+        rectangleButton.setText("         ");
+        rectangleButton.setFocusable(false);
+        rectangleButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        rectangleButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        rectangleButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                rectangleButtonActionPerformed(evt);
+            }
+        });
+        buttonPanel.add(rectangleButton);
+
+        roundedRectangleButton1.setText("        ");
+        roundedRectangleButton1.setFocusable(false);
+        roundedRectangleButton1.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        roundedRectangleButton1.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        roundedRectangleButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                roundedRectangleButton1ActionPerformed(evt);
+            }
+        });
+        buttonPanel.add(roundedRectangleButton1);
+
+        lineButton.setText("         ");
+        lineButton.setFocusable(false);
+        lineButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        lineButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        lineButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                lineButtonActionPerformed(evt);
+            }
+        });
+        buttonPanel.add(lineButton);
+
+        freehandButton.setText("         ");
+        freehandButton.setFocusable(false);
+        freehandButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        freehandButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        freehandButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                freehandButtonActionPerformed(evt);
+            }
+        });
+        buttonPanel.add(freehandButton);
+
+        textButton.setText("        ");
+        textButton.setFocusable(false);
+        textButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        textButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        textButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                textButtonActionPerformed(evt);
+            }
+        });
+        buttonPanel.add(textButton);
+
+        clearButton.setText("Clear");
+        clearButton.setFocusable(false);
+        clearButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        clearButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        clearButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                clearButtonActionPerformed(evt);
+            }
+        });
+        buttonPanel.add(clearButton);
+        buttonPanel.add(jSeparator1);
+
+        dashedBar.setText("Dashed");
+        dashedBar.setFocusable(false);
+        dashedBar.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        dashedBar.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        dashedBar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                dashedBarActionPerformed(evt);
+            }
+        });
+        buttonPanel.add(dashedBar);
+
+        filledBar.setText("Filled");
+        filledBar.setFocusable(false);
+        filledBar.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        filledBar.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        filledBar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                filledBarActionPerformed(evt);
+            }
+        });
+        buttonPanel.add(filledBar);
+
+        transparencyPanel.setLayout(new java.awt.BorderLayout());
+
+        transparencyLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        transparencyLabel.setText("Transparency");
+        transparencyPanel.add(transparencyLabel, java.awt.BorderLayout.PAGE_END);
+
+        alphaSlider.setPaintTrack(false);
+        alphaSlider.setMaximumSize(new java.awt.Dimension(50, 50));
+        alphaSlider.setMinimumSize(new java.awt.Dimension(50, 50));
+        alphaSlider.setPreferredSize(new java.awt.Dimension(150, 50));
+        alphaSlider.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                alphaSliderStateChanged(evt);
+            }
+        });
+        transparencyPanel.add(alphaSlider, java.awt.BorderLayout.CENTER);
+
+        buttonPanel.add(transparencyPanel);
+
+        setGradientToggle.setText("Set Gradient");
+        setGradientToggle.setFocusable(false);
+        setGradientToggle.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        setGradientToggle.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        setGradientToggle.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                setGradientToggleActionPerformed(evt);
+            }
+        });
+        buttonPanel.add(setGradientToggle);
+
+        setTextureToggle.setText("Set Texture");
+        setTextureToggle.setFocusable(false);
+        setTextureToggle.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        setTextureToggle.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        setTextureToggle.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                setTextureToggleActionPerformed(evt);
+            }
+        });
+        buttonPanel.add(setTextureToggle);
+
+        jPanel1.setLayout(new java.awt.BorderLayout());
+
+        textLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        textLabel.setText("Text to Write");
+        jPanel1.add(textLabel, java.awt.BorderLayout.CENTER);
+
+        placeTextField.setColumns(14);
+        placeTextField.setText(" ");
+        jPanel1.add(placeTextField, java.awt.BorderLayout.PAGE_START);
+
+        buttonPanel.add(jPanel1);
+
+        getContentPane().add(buttonPanel, java.awt.BorderLayout.NORTH);
+
+        drawPanel.setBackground(new java.awt.Color(204, 204, 204));
+        drawPanel.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                drawPanelMouseClicked(evt);
+            }
+        });
+        drawPanel.addComponentListener(new java.awt.event.ComponentAdapter() {
+            public void componentResized(java.awt.event.ComponentEvent evt) {
+                drawPanelComponentResized(evt);
+            }
+        });
+        drawPanel.addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
+            public void mouseMoved(java.awt.event.MouseEvent evt) {
+                drawPanelMouseMoved(evt);
+            }
+            public void mouseDragged(java.awt.event.MouseEvent evt) {
+                drawPanelMouseDragged(evt);
+            }
+        });
+
+        javax.swing.GroupLayout drawPanelLayout = new javax.swing.GroupLayout(drawPanel);
+        drawPanel.setLayout(drawPanelLayout);
+        drawPanelLayout.setHorizontalGroup(
+            drawPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 1084, Short.MAX_VALUE)
+        );
+        drawPanelLayout.setVerticalGroup(
+            drawPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 358, Short.MAX_VALUE)
+        );
+
+        getContentPane().add(drawPanel, java.awt.BorderLayout.CENTER);
+
+        sliderPanel.setPreferredSize(new java.awt.Dimension(1, 100));
+        sliderPanel.setLayout(new java.awt.GridLayout(1, 0));
+
+        colorPanel.setBackground(java.awt.SystemColor.control);
+        colorPanel.setForeground(java.awt.SystemColor.control);
+
+        javax.swing.GroupLayout colorPanelLayout = new javax.swing.GroupLayout(colorPanel);
+        colorPanel.setLayout(colorPanelLayout);
+        colorPanelLayout.setHorizontalGroup(
+            colorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 216, Short.MAX_VALUE)
+        );
+        colorPanelLayout.setVerticalGroup(
+            colorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 100, Short.MAX_VALUE)
+        );
+
+        sliderPanel.add(colorPanel);
+
+        redPanel.setLayout(new java.awt.BorderLayout());
+
+        redSlider.setForeground(new java.awt.Color(255, 0, 0));
+        redSlider.setMajorTickSpacing(50);
+        redSlider.setMaximum(255);
+        redSlider.setMinorTickSpacing(10);
+        redSlider.setPaintLabels(true);
+        redSlider.setPaintTicks(true);
+        redSlider.setToolTipText("Red");
+        redSlider.setValue(125);
+        redSlider.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                redSliderStateChanged(evt);
+            }
+        });
+        redPanel.add(redSlider, java.awt.BorderLayout.CENTER);
+
+        redLabel.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        redLabel.setForeground(new java.awt.Color(255, 51, 51));
+        redLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        redLabel.setText("Red");
+        redPanel.add(redLabel, java.awt.BorderLayout.PAGE_START);
+
+        sliderPanel.add(redPanel);
+
+        greenPanel.setLayout(new java.awt.BorderLayout());
+
+        greenSlider.setForeground(new java.awt.Color(51, 204, 0));
+        greenSlider.setMajorTickSpacing(50);
+        greenSlider.setMaximum(255);
+        greenSlider.setMinorTickSpacing(10);
+        greenSlider.setPaintLabels(true);
+        greenSlider.setPaintTicks(true);
+        greenSlider.setToolTipText("Green");
+        greenSlider.setValue(125);
+        greenSlider.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                greenSliderStateChanged(evt);
+            }
+        });
+        greenPanel.add(greenSlider, java.awt.BorderLayout.CENTER);
+
+        greenLabel.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        greenLabel.setForeground(new java.awt.Color(51, 204, 0));
+        greenLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        greenLabel.setText("Green");
+        greenPanel.add(greenLabel, java.awt.BorderLayout.PAGE_START);
+
+        sliderPanel.add(greenPanel);
+
+        bluePanel.setLayout(new java.awt.BorderLayout());
+
+        blueSlider.setForeground(new java.awt.Color(0, 51, 255));
+        blueSlider.setMajorTickSpacing(50);
+        blueSlider.setMaximum(255);
+        blueSlider.setMinorTickSpacing(10);
+        blueSlider.setPaintLabels(true);
+        blueSlider.setPaintTicks(true);
+        blueSlider.setToolTipText("Blue");
+        blueSlider.setValue(125);
+        blueSlider.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                blueSliderStateChanged(evt);
+            }
+        });
+        bluePanel.add(blueSlider, java.awt.BorderLayout.CENTER);
+
+        blueLabel.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        blueLabel.setForeground(new java.awt.Color(0, 51, 255));
+        blueLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        blueLabel.setText("Blue");
+        bluePanel.add(blueLabel, java.awt.BorderLayout.PAGE_START);
+
+        sliderPanel.add(bluePanel);
+
+        thicknessPanel.setLayout(new java.awt.BorderLayout());
+
+        thicknessSlider.setForeground(new java.awt.Color(1, 1, 1));
+        thicknessSlider.setMajorTickSpacing(50);
+        thicknessSlider.setMinorTickSpacing(10);
+        thicknessSlider.setPaintLabels(true);
+        thicknessSlider.setPaintTicks(true);
+        thicknessSlider.setToolTipText("Red");
+        thicknessSlider.setValue(20);
+        thicknessSlider.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                thicknessSliderStateChanged(evt);
+            }
+        });
+        thicknessPanel.add(thicknessSlider, java.awt.BorderLayout.CENTER);
+
+        thicknessLabel.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        thicknessLabel.setForeground(new java.awt.Color(1, 1, 1));
+        thicknessLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        thicknessLabel.setText("Thickness");
+        thicknessPanel.add(thicknessLabel, java.awt.BorderLayout.PAGE_START);
+
+        sliderPanel.add(thicknessPanel);
+
+        getContentPane().add(sliderPanel, java.awt.BorderLayout.SOUTH);
+
+        jMenu1.setText("File");
+
+        open.setText("Open Drawing");
+        open.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                openActionPerformed(evt);
+            }
+        });
+        jMenu1.add(open);
+
+        imageExportMenuItem.setText("Export Image");
+        imageExportMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                imageExportMenuItemActionPerformed(evt);
+            }
+        });
+        jMenu1.add(imageExportMenuItem);
+
+        save.setText("Save As...");
+        save.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                saveActionPerformed(evt);
+            }
+        });
+        jMenu1.add(save);
+
+        print.setText("Print");
+        print.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                printActionPerformed(evt);
+            }
+        });
+        jMenu1.add(print);
+
+        menuBar.add(jMenu1);
+
+        dashed.setText("Edit");
+
+        dashedMenuItem.setText("Dashed Stroke");
+        dashedMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                dashedMenuItemActionPerformed(evt);
+            }
+        });
+        dashed.add(dashedMenuItem);
+
+        filledMenuItem.setText("Filled Stroke");
+        filledMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                filledMenuItemActionPerformed(evt);
+            }
+        });
+        dashed.add(filledMenuItem);
+
+        menuBar.add(dashed);
+
+        setJMenuBar(menuBar);
+    }// </editor-fold>//GEN-END:initComponents
+
+    private void drawPanelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_drawPanelMouseClicked
+        //cancel drawing the shape is the right mouse button is pressed
+        if (SwingUtilities.isRightMouseButton(evt)) {
+            if (drawing) { //prevents computationally intensive redraws if we aren't actually drawing
+                drawing = false;
+                System.out.println("drawing cancelled");
+                //clear the deleted shape from the window by redrawing the panel
+                repaintShapes(false);
+            }
+        } else {
+            System.out.println("start:" + evt.getX() + "," + evt.getY());
+            if (!drawing) { //start drawing our new shape from the current coordinate
+                start = new Coordinate(evt.getX(), evt.getY());
+                if (bg == null) {
+                    bg = this.createImage(this.getWidth(), this.getHeight());
+                    fg = this.createImage(this.getWidth(), this.getHeight());
+                }
+            } else { //finish drawing the last shape
+                System.out.println("stop:" + evt.getX() + "," + evt.getY());
+                Coordinate end = new Coordinate(evt.getX(), evt.getY());
+                switch (drawMode) {
+                    case Shape.LINE:
+                        shapes.add(new Line(getColor(), start, end, getThickness(), dashedBar.isSelected(), filledBar.isSelected(), getAlphaFloat(), getGradientPaint(), getTexturePaint()));
+                        break;
+                    case Shape.RECTANGLE:
+                        //because we want to allow flexible rectangle drawing, this is a special case.
+                        //we need to make sure that width and height are positive.
+                        shapes.add(new Rectangle(getColor(), new Coordinate(Math.min(start.x, evt.getX()), Math.min(start.y, evt.getY())),
+                                Math.abs(evt.getX() - start.x), Math.abs(evt.getY() - start.y), getThickness(), dashedBar.isSelected(), filledBar.isSelected(), getAlphaFloat(), getGradientPaint(), getTexturePaint()));
+                        break;
+                    case Shape.OVAL:
+                        //because we want to allow flexible rectangle drawing, this is a special case.
+                        //we need to make sure that width and height are positive.
+                        shapes.add(new Oval(getColor(), new Coordinate(Math.min(start.x, evt.getX()), Math.min(start.y, evt.getY())),
+                                Math.abs(evt.getX() - start.x), Math.abs(evt.getY() - start.y), getThickness(), dashedBar.isSelected(), filledBar.isSelected(), getAlphaFloat(), getGradientPaint(), getTexturePaint())); //width and height
+                        break;
+                    case Shape.ROUND_RECTANGLE:
+                        shapes.add(new RoundedRectangle(getColor(), new Coordinate(Math.min(start.x, evt.getX()), Math.min(start.y, evt.getY())),
+                                Math.abs(evt.getX() - start.x), Math.abs(evt.getY() - start.y), getThickness(), dashedBar.isSelected(), filledBar.isSelected(), getAlphaFloat(), getGradientPaint(), getTexturePaint()));
+                        break;
+                    case Shape.TEXT:
+                        shapes.add(new Text(getColor(), placeTextField.getText(), new Coordinate(evt.getX(), evt.getY())));
+                        break;
+                    case Shape.FREEHAND:
+                        shapes.add(new FreeHand(getColor(), freeHandVector, getThickness(), dashedBar.isSelected(), filledBar.isSelected(), getAlphaFloat(), getGradientPaint(), getTexturePaint()));
+                        freeHandVector.clear();
+                        break;
+                }
+                bg.getGraphics().drawImage(fg, 0, 0, null);
+            }
+            drawing = !drawing;
+        }
+    }//GEN-LAST:event_drawPanelMouseClicked
+
+    private void drawPanelMouseMoved(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_drawPanelMouseMoved
+//        System.out.println("move:" + evt.getX() + "," + evt.getY());
+        BasicStroke bs = getStroke();
+        if (drawing) {
+            Graphics2D fgg = (Graphics2D) fg.getGraphics();
+            fgg.setStroke(bs);
+            fgg.drawImage(bg, 0, 0, null);
+            fgg.setColor(getColor());
+            if (gp != null) {
+                fgg.setPaint(gp);
+            }
+            if (tp != null) {
+                fgg.setPaint(tp);
+            }
+            switch (drawMode) {
+                case Shape.FREEHAND:
+                    for (int i = 0; i < freeHandVector.size(); i++) {
+                        fgg.setColor(freeHandVector.get(i).c);
+                        freeHandVector.get(i).draw(fgg);
+                    }
+                    start = new Coordinate(evt.getX(), evt.getY());
+                    break;
+                //break is intentionally omitted in order to reuse line code
+                case Shape.LINE:
+                    fgg.drawLine(start.x, start.y, evt.getX(), evt.getY());
+                    break;
+
+                //some math is involved with rectangles and ovals since we want to let the user
+                //choose an ending coordinate less than the X and Y of the starting coordinate
+                case Shape.RECTANGLE:
+                    if (filledBar.isSelected()) {
+                        fgg.fillRect(Math.min(start.x, evt.getX()), //starting X coordinat
+                                Math.min(start.y, evt.getY()), //starting Y coordinate
+                                Math.abs(evt.getX() - start.x), Math.abs(evt.getY() - start.y)); //width and height
+                    } else {
+                        fgg.drawRect(Math.min(start.x, evt.getX()), //starting X coordinat
+                                Math.min(start.y, evt.getY()), //starting Y coordinate
+                                Math.abs(evt.getX() - start.x), Math.abs(evt.getY() - start.y)); //width and height 
+                    }
+
+                    break;
+                case Shape.OVAL:
+                    if (filledBar.isSelected()) {
+                        fgg.fillOval(Math.min(start.x, evt.getX()), //starting X coordinat
+                                Math.min(start.y, evt.getY()), //starting Y coordinate
+                                Math.abs(evt.getX() - start.x), Math.abs(evt.getY() - start.y)); //width and height
+                    } else {
+                        fgg.drawOval(Math.min(start.x, evt.getX()), //starting X coordinat
+                                Math.min(start.y, evt.getY()), //starting Y coordinate
+                                Math.abs(evt.getX() - start.x), Math.abs(evt.getY() - start.y)); //width and height
+                    }
+                    break;
+                case Shape.ROUND_RECTANGLE:
+                    if (filledBar.isSelected()) {
+                        fgg.fillRoundRect(Math.min(start.x, evt.getX()), //starting X coordinat
+                                Math.min(start.y, evt.getY()), //starting Y coordinate
+                                Math.abs(evt.getX() - start.x), Math.abs(evt.getY() - start.y), 30, 30); //width and height
+                    } else {
+                        fgg.drawRoundRect(Math.min(start.x, evt.getX()), //starting X coordinat
+                                Math.min(start.y, evt.getY()), //starting Y coordinate
+                                Math.abs(evt.getX() - start.x), Math.abs(evt.getY() - start.y), 30, 30); //width and height
+                    }
+                    break;
+                case Shape.TEXT:
+                    fgg.drawString(placeTextField.getText(), evt.getX(), evt.getY());
+                    break;
+            }
+            if (drawMode == Shape.FREEHAND) {
+                freeHandVector.add(new Line(getColor(), start, new Coordinate(evt.getX(), evt.getY()), getThickness(), dashedBar.isSelected(), filledBar.isSelected(), getAlphaFloat(), getGradientPaint(), getTexturePaint()));
+            }
+            drawPanel.getGraphics().drawImage(fg, 0, 0, null);
+        }
+    }//GEN-LAST:event_drawPanelMouseMoved
+
+    private void drawPanelMouseDragged(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_drawPanelMouseDragged
+        if (!drawing) { //we only want to start drawing if we drag so that the end point is precise
+            System.out.println("drag start:" + evt.getX() + "," + evt.getY());
+            start = new Coordinate(evt.getX(), evt.getY());
+            drawing = true;
+        }
+    }//GEN-LAST:event_drawPanelMouseDragged
+
+    private void drawPanelComponentResized(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_drawPanelComponentResized
+        repaintShapes(false);
+    }//GEN-LAST:event_drawPanelComponentResized
+
+    private void rectangleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rectangleButtonActionPerformed
+        drawMode = Shape.RECTANGLE;
+    }//GEN-LAST:event_rectangleButtonActionPerformed
+
+    private void formMouseMoved(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_formMouseMoved
+    }//GEN-LAST:event_formMouseMoved
+
+    private Color getColor() {
+        return new Color(redSlider.getValue(), greenSlider.getValue(), blueSlider.getValue(), getAlpha());
+    }
+
+    private GradientPaint getGradientPaint() {
+        if (!setGradientToggle.isSelected()) {
+            return null;
+        } else {
+            return gp;
+        }
+    }
+
+    private TexturePaint getTexturePaint() {
+        if (!setTextureToggle.isSelected()) {
+            return null;
+        } else {
+            return tp;
+        }
+    }
+
+    private void updateColorPanel() {
+        colorPanel.setBackground(new Color(223, 223, 223));
+        Graphics g = colorPanel.getGraphics();
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.setColor(new Color(223, 223, 223));
+        g2d.fillRect(0, 0, colorPanel.getWidth(), colorPanel.getHeight());
+        g2d.setColor(getColor());
+        g2d.setStroke(getStroke());
+        g2d.drawLine(0, 0, colorPanel.getWidth(), colorPanel.getHeight());
+    }
+
+    private void redSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_redSliderStateChanged
+        updateColorPanel();
+    }//GEN-LAST:event_redSliderStateChanged
+
+    private void greenSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_greenSliderStateChanged
+        updateColorPanel();
+    }//GEN-LAST:event_greenSliderStateChanged
+
+    private void blueSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_blueSliderStateChanged
+        updateColorPanel();
+    }//GEN-LAST:event_blueSliderStateChanged
+
+    private void lineButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lineButtonActionPerformed
+        drawMode = Shape.LINE;
+    }//GEN-LAST:event_lineButtonActionPerformed
+
+    private void ovalButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ovalButtonActionPerformed
+        drawMode = Shape.OVAL;
+    }//GEN-LAST:event_ovalButtonActionPerformed
+
+    private void clearButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearButtonActionPerformed
+        shapes.clear();
+        freeHandVector.clear();
+        clearDrawing();
+        repaintShapes(false);
+    }//GEN-LAST:event_clearButtonActionPerformed
+
+    private void roundedRectangleButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_roundedRectangleButton1ActionPerformed
+        drawMode = Shape.ROUND_RECTANGLE;
+    }//GEN-LAST:event_roundedRectangleButton1ActionPerformed
+
+    private void dashedBarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_dashedBarActionPerformed
+        dashedMenuItem.setState(dashedBar.isSelected());
+        updateColorPanel();
+    }//GEN-LAST:event_dashedBarActionPerformed
+
+    private void dashedMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_dashedMenuItemActionPerformed
+        dashedBar.setSelected(dashedMenuItem.getState());
+        updateColorPanel();
+    }//GEN-LAST:event_dashedMenuItemActionPerformed
+
+    private void saveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveActionPerformed
+        JFileChooser chooser = new JFileChooser();
+        chooser.setCurrentDirectory(new File("./"));
+        if (chooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+            try {
+                File f = new File(chooser.getSelectedFile() + "");
+                FileOutputStream fos = new FileOutputStream(f);
+                ObjectOutputStream oos = new ObjectOutputStream(fos);
+                oos.writeObject(shapes);
+
+
+            } catch (IOException ex) {
+                Logger.getLogger(Drawing.class
+                        .getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }//GEN-LAST:event_saveActionPerformed
+
+    private void openActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_openActionPerformed
+        JFileChooser chooser = new JFileChooser();
+        chooser.setCurrentDirectory(new File("./"));
+        if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            try {
+                File f = new File(chooser.getSelectedFile() + "");
+                FileInputStream fis = new FileInputStream(f);
+                ObjectInputStream ois = new ObjectInputStream(fis);
+                shapes = (ArrayList<Shape>) ois.readObject();
+                clearDrawing();
+                repaintShapes(true);
+
+
+            } catch (ClassNotFoundException ex) {
+                Logger.getLogger(Drawing.class
+                        .getName()).log(Level.SEVERE, null, ex);
+            } catch (IOException ex) {
+                Logger.getLogger(Drawing.class
+                        .getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+
+    }//GEN-LAST:event_openActionPerformed
+
+    private void printActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_printActionPerformed
+        PrinterJob pj = PrinterJob.getPrinterJob();
+        PageFormat pf = pj.pageDialog(new PageFormat());
+        if (pj.printDialog()) {
+            Book b = new Book();
+            PrintableDrawing p;
+//            p = new PrintableDrawing(drawPanel.createImage(drawPanel.getWidth(), drawPanel.getHeight()));
+            repaintShapes(false);
+            p = new PrintableDrawing(bg);
+            b.append(p, pf);
+            pj.setPageable(b);
+            try {
+                pj.print();
+            } catch (PrinterException ex) {
+                Logger.getLogger(Drawing.class
+                        .getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }//GEN-LAST:event_printActionPerformed
+
+    private void filledBarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_filledBarActionPerformed
+        filledMenuItem.setState(filledBar.isSelected());
+        updateColorPanel();
+    }//GEN-LAST:event_filledBarActionPerformed
+
+    private void filledMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_filledMenuItemActionPerformed
+        filledBar.setSelected(filledMenuItem.isSelected());
+        updateColorPanel();
+    }//GEN-LAST:event_filledMenuItemActionPerformed
+
+    private void thicknessSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_thicknessSliderStateChanged
+        updateColorPanel();
+    }//GEN-LAST:event_thicknessSliderStateChanged
+
+    private void alphaSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_alphaSliderStateChanged
+        updateColorPanel();
+    }//GEN-LAST:event_alphaSliderStateChanged
+
+    private void setGradientToggleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_setGradientToggleActionPerformed
+        try {
+            if (setGradientToggle.isSelected()) {
+                Color c1 = null, c2 = null;
+                c1 = JColorChooser.showDialog(setGradientToggle, "Color 1", c1);
+                c2 = JColorChooser.showDialog(setGradientToggle, "Color 2", c2);
+                gp = new GradientPaint(drawPanel.getWidth() / 2, 0F, c1, drawPanel.getWidth() / 2, drawPanel.getHeight(), c2);
+            }
+        } catch (Exception e) {
+            gp = null;
+            setGradientToggle.setSelected(false);
+        }
+        updateColorPanel();
+    }//GEN-LAST:event_setGradientToggleActionPerformed
+
+    private void freehandButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_freehandButtonActionPerformed
+        drawMode = Shape.FREEHAND;
+    }//GEN-LAST:event_freehandButtonActionPerformed
+
+    private void textButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_textButtonActionPerformed
+        drawMode = Shape.TEXT;
+    }//GEN-LAST:event_textButtonActionPerformed
+
+    private void formWindowStateChanged(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowStateChanged
+        clearDrawing();
+        repaintShapes(true);
+    }//GEN-LAST:event_formWindowStateChanged
+
+    private void setTextureToggleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_setTextureToggleActionPerformed
+        if (setTextureToggle.isSelected()) {
+            BufferedImage bi = new BufferedImage(500, 500, BufferedImage.TYPE_BYTE_INDEXED);
+            Graphics biGraphics = bi.createGraphics();
+            ImageIcon i = new ImageIcon(getClass().getResource("image.png"));
+            biGraphics.drawImage(i.getImage(), 0, 0, null);
+            Rectangle2D r = new java.awt.Rectangle(500, 500);
+            tp = new TexturePaint(bi, r);
+        } else {
+            tp = null;
+        }
+    }//GEN-LAST:event_setTextureToggleActionPerformed
+
+    private void imageExportMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_imageExportMenuItemActionPerformed
+        JFileChooser chooser = new JFileChooser();
+        chooser.setCurrentDirectory(new File("./"));
+        if (chooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+            try {
+                BufferedImage image = new BufferedImage(drawPanel.getWidth(), drawPanel.getHeight(), BufferedImage.TYPE_INT_RGB);
+                Graphics2D g2d = image.createGraphics();
+                drawPanel.paint(g2d);
+                g2d.drawImage(bg, 0, 0, null);
+                File f = new File(chooser.getSelectedFile() + "");
+                FileOutputStream fos = new FileOutputStream(f);
+                ImageIO.write(image, "png", f);
+            } catch (IOException ex) {
+                Logger.getLogger(Drawing.class
+                        .getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+
+    }//GEN-LAST:event_imageExportMenuItemActionPerformed
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JSlider alphaSlider;
+    private javax.swing.JLabel blueLabel;
+    private javax.swing.JPanel bluePanel;
+    private javax.swing.JSlider blueSlider;
+    private javax.swing.JToolBar buttonPanel;
+    private javax.swing.JButton clearButton;
+    private javax.swing.JPanel colorPanel;
+    private javax.swing.JMenu dashed;
+    private javax.swing.JCheckBox dashedBar;
+    private javax.swing.JCheckBoxMenuItem dashedMenuItem;
+    protected static javax.swing.JPanel drawPanel;
+    private javax.swing.JCheckBox filledBar;
+    private javax.swing.JCheckBoxMenuItem filledMenuItem;
+    private drawing.FreehandButton freehandButton;
+    private javax.swing.JLabel greenLabel;
+    private javax.swing.JPanel greenPanel;
+    private javax.swing.JSlider greenSlider;
+    private javax.swing.JMenuItem imageExportMenuItem;
+    private javax.swing.JMenu jMenu1;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JToolBar.Separator jSeparator1;
+    private drawing.LineButton lineButton;
+    private javax.swing.JMenuBar menuBar;
+    private javax.swing.JMenuItem open;
+    private drawing.OvalButton ovalButton;
+    private javax.swing.JTextField placeTextField;
+    private javax.swing.JMenuItem print;
+    private drawing.RectangleButton rectangleButton;
+    private javax.swing.JLabel redLabel;
+    private javax.swing.JPanel redPanel;
+    private javax.swing.JSlider redSlider;
+    private drawing.RoundedRectangleButton roundedRectangleButton1;
+    private javax.swing.JMenuItem save;
+    private javax.swing.JToggleButton setGradientToggle;
+    private javax.swing.JToggleButton setTextureToggle;
+    private javax.swing.JPanel sliderPanel;
+    private drawing.TextButton textButton;
+    private javax.swing.JLabel textLabel;
+    private javax.swing.JLabel thicknessLabel;
+    private javax.swing.JPanel thicknessPanel;
+    private javax.swing.JSlider thicknessSlider;
+    private javax.swing.JLabel transparencyLabel;
+    private javax.swing.JPanel transparencyPanel;
+    // End of variables declaration//GEN-END:variables
+
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String args[]) {
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    UIManager.setLookAndFeel(
+                            UIManager.getSystemLookAndFeelClassName());
+                } catch (UnsupportedLookAndFeelException e) {
+                    // handle exception
+                } catch (ClassNotFoundException e) {
+                    // handle exception
+                } catch (InstantiationException e) {
+                    // handle exception
+                } catch (IllegalAccessException e) {
+                    // handle exception
+                }
+                Drawing d = new Drawing();
+                d.setSize(900, 600);
+                d.setVisible(true);
+                d.clearDrawing();
+                d.updateColorPanel();
+            }
+        });
+    }
+
+    private BasicStroke getStroke() {
+        if (!dashedBar.isSelected()) {
+            return new BasicStroke(getThickness());
+        } else {
+            float fa[] = {10, 10, 10};
+            return new BasicStroke(getThickness(), BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 10, fa, 10);
+        }
+    }
+}
